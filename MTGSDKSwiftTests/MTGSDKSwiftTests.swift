@@ -144,3 +144,42 @@ extension MTGSDKSwiftTests {
         waitForExpectations(timeout: defaultTimeout, handler: nil)
     }
 }
+
+// MARK: - Fetch Sets
+
+extension MTGSDKSwiftTests {
+
+    func testFetchKhansOfTarkirAndVerify() {
+        let param = SetSearchParameter(parameterType: .name, value: "Khans of Tarkir")
+
+        let exp = expectation(description: "fetchCards")
+
+        magic .fetchSets([param]) { result in
+            defer {
+                exp.fulfill()
+            }
+            
+            switch result {
+            case .success(let sets):
+                
+                XCTAssertEqual(sets.count, 1)
+                
+                
+                guard let set = sets.first(where: {$0.code == "KTK" }) else {
+                    XCTFail("unable to fetch expected test set")
+                    return
+                }
+                XCTAssertEqual("Khans of Tarkir", set.name)
+                XCTAssertEqual("Khans of Tarkir", set.block)
+                XCTAssertEqual("KTK", set.code)
+                XCTAssertEqual("black", set.border)
+                XCTAssertEqual("ktk", set.magicCardsInfoCode)
+                XCTAssertEqual("2014-09-26  ", set.releaseDate)
+                XCTAssertEqual(16, set.booster?.count)
+            case .error(let error):
+                XCTFail("Error fetching cards: \(error.localizedDescription)")
+            }
+        }
+        waitForExpectations(timeout: defaultTimeout, handler: nil)
+    }
+}
